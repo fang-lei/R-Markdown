@@ -1,0 +1,199 @@
+---
+title: "Stock Data Analysis"
+author: "Lei Fang"
+output: pdf_document
+header-includes:
+  - \usepackage{color}
+---
+
+```{r include = FALSE}
+library(readxl)
+library(pastecs)
+library(xts)
+```
+
+The goal is to find a strategy that uses the fact that this ETF is constantly going down, in order to make a daily compounding profit.
+
+# \color{blue}What we have
+* [UVXY](http://www.nasdaq.com/symbol/uvxy)
+    + Daily Open/Close Prices
+    + Daily High/Low Prices
+    + Daily Volume
+    + Split-Adjusted Equivalent Open/Close Prices
+* [VIX](https://en.wikipedia.org/wiki/VIX)
+    + Daily Open/Close Prices
+
+
+# \color{blue} Descriptive Analysis
+
+```{r include = FALSE}
+# read Excel data file
+stock_data = read_excel("/Users/lei.fang/Desktop/R-Markdown/Stock Data Analysis/stock_data_for_lei.xlsx", sheet = 1, col_names = TRUE)
+Date           = stock_data$Date
+UVXY_Open      = stock_data$Open
+UVXY_Close     = stock_data$Close
+UVXY_High      = stock_data$High
+UVXY_Low       = stock_data$Low
+UVXY_Volume    = stock_data$Volume
+UVXY_Adj_Open  = stock_data$`Adj_Open`
+UVXY_Adj_Close = stock_data$`Adj_Close`
+VIX_Open       = stock_data$`Vix_Open`
+VIX_Close      = stock_data$`Vix_Close`
+attach(stock_data)
+UVXY      = cbind(Date, Open, Close, Adj_Open, Adj_Close, High, Low, Volume)
+UVXY_desc = cbind(Open, Close, Adj_Open, Adj_Close, High, Low, Volume)
+VIX       = cbind(Date, Vix_Open, Vix_Close)
+VIX_desc  = cbind(Vix_Open, Vix_Close)
+```
+
+```{r warning = FALSE}
+library(knitr)
+options(scipen = 100)
+options(digits = 2)
+kable(stat.desc(UVXY_desc, desc = F), caption = "UVXY Descriptive Table")
+kable(stat.desc(VIX_desc, desc = F), caption = "VIX Descriptiv Table")
+```
+
+
+# \color{blue} Task 1
+For example, consider you short sell UVXY every morning and buy to cover at the end of every day. On average, how profitable would this strategy be?
+
+- Time Series Plot of **Log Split-Adjusted Equivalent Open/Close Prices**
+```{r}
+plot(Date, log(UVXY_Adj_Open), ylab = "Price", col = "red", type = "l", lwd = 2)
+lines(Date, log(UVXY_Adj_Close), col = "blue")
+legend('topright', legend = c('Open Price', 'Close Price'), col = c("red","blue"), lty=1)
+```
+
+- Time Series Plot of **Daily Open/Close Prices**
+```{r}
+plot(Date, UVXY_Open, ylab = "Price", col = "red", type = "l", lwd = 2)
+lines(Date, UVXY_Close, col = "blue")
+legend('topright', legend = c('Open Price', 'Close Price'), col = c("red","blue"), lty=1)
+```
+
+- Suppose we trade 100 shares of UVXY per day and we use original daily UVXY open/close price,
+```{r}
+daily_profit_ave = mean((UVXY_Open - UVXY_Close)*100)
+daily_profit_max = max((UVXY_Open - UVXY_Close)*100)
+daily_profit_min = min((UVXY_Open - UVXY_Close)*100)
+```
+| Daily Profit based on 100 Shares | Average | Max | Min |
+|---------------------------------:|--------:|----:|----:|
+|                                  |`r daily_profit_ave`|`r daily_profit_max`|`r daily_profit_min`|
+
+
+# \color{blue} Task 2
+What was the return of this strategy every year on a yearly basis, 2011-present?
+
+```{r include= FALSE}
+# seperate data by years
+data = xts(stock_data[,-1], stock_data[,1])
+data2011 = data["2011"]
+data2012 = data["2012"]
+data2013 = data["2013"]
+data2014 = data["2014"]
+data2015 = data["2015"]
+data2016 = data["2016"]
+data2017 = data["2017"]
+```
+
+- \color{blue} **2011**
+
+```{r}
+plot(data2011$Open-data2011$Close, ylab = "Profit", 
+     main = "Time Series of Daily Profit per Share")
+```
+
+| Daily Profit based on 100 Shares | Average | Max | Min |
+|---------------------------------:|--------:|----:|----:|
+|                                  |`r mean(data2011$Open-data2011$Close)*100`|`r max(data2011$Open-data2011$Close)*100`|`r min(data2011$Open-data2011$Close)*100`|
+
+- \color{blue} **2012**
+
+```{r echo = FALSE}
+plot(data2012$Open-data2012$Close, ylab = "Profit", 
+     main = "Time Series of Daily Profit per Share")
+```
+
+| Daily Profit based on 100 Shares | Average | Max | Min |
+|---------------------------------:|--------:|----:|----:|
+|                                  |`r mean(data2012$Open-data2012$Close)*100`|`r max(data2012$Open-data2012$Close)*100`|`r min(data2012$Open-data2012$Close)*100`|
+
+- \color{blue} **2013**
+
+```{r echo = FALSE}
+plot(data2013$Open-data2013$Close, ylab = "Profit", 
+     main = "Time Series of Daily Profit per Share")
+```
+
+| Daily Profit based on 100 Shares | Average | Max | Min |
+|---------------------------------:|--------:|----:|----:|
+|                                  |`r mean(data2013$Open-data2013$Close)*100`|`r max(data2013$Open-data2013$Close)*100`|`r min(data2013$Open-data2013$Close)*100`|
+
+- \color{blue} **2014**
+
+```{r echo = FALSE}
+plot(data2014$Open-data2014$Close, ylab = "Profit", 
+     main = "Time Series of Daily Profit per Share")
+```
+
+| Daily Profit based on 100 Shares | Average | Max | Min |
+|---------------------------------:|--------:|----:|----:|
+|                                  |`r mean(data2014$Open-data2014$Close)*100`|`r max(data2014$Open-data2014$Close)*100`|`r min(data2014$Open-data2014$Close)*100`|
+
+- \color{blue} **2015**
+
+```{r echo = FALSE}
+plot(data2015$Open-data2015$Close, ylab = "Profit", 
+     main = "Time Series of Daily Profit per Share")
+```
+
+| Daily Profit based on 100 Shares | Average | Max | Min |
+|---------------------------------:|--------:|----:|----:|
+|                                  |`r mean(data2015$Open-data2015$Close)*100`|`r max(data2015$Open-data2015$Close)*100`|`r min(data2015$Open-data2015$Close)*100`|
+
+- \color{blue} **2016**
+
+```{r echo = FALSE}
+plot(data2016$Open-data2016$Close, ylab = "Profit", 
+     main = "Time Series of Daily Profit per Share")
+```
+
+| Daily Profit based on 100 Shares | Average | Max | Min |
+|---------------------------------:|--------:|----:|----:|
+|                                  |`r mean(data2016$Open-data2016$Close)*100`|`r max(data2016$Open-data2016$Close)*100`|`r min(data2016$Open-data2016$Close)*100`|
+
+- \color{blue} **2017**
+
+```{r echo = FALSE}
+plot(data2017$Open-data2017$Close, ylab = "Profit", 
+     main = "Time Series of Daily Profit per Share")
+```
+
+| Daily Profit based on 100 Shares | Average | Max | Min |
+|---------------------------------:|--------:|----:|----:|
+|                                  |`r mean(data2017$Open-data2017$Close)*100`|`r max(data2017$Open-data2017$Close)*100`|`r min(data2017$Open-data2017$Close)*100`|
+
+
+# \color{blue} Further Thinking
+For example, considering the VIX (volatility index) as part of the calculation or excluding certain days of the week.
+
+- Time Series Plot of **Daily UVXY Open Prices**, **VIX Open Prices** and **Daily Profit per Share**
+```{r}
+plot(data$Open-data$Close, ylim = c(-12, 100), ylab = "Price / Profit", 
+     main = "UVXY/VIX Open Price and Daily Profit per Share")
+lines(Date, UVXY_Open, col = "red")
+lines(Date, VIX_Open, col = "blue")
+legend('topright', legend = c('Profit', 'UVXY', 'VIX'), 
+       col = c("black", "red","blue"), lty=1)
+```
+
+- Time Series Plot of **VIX Open Prices** and **Daily Profit per Share**
+```{r}
+plot(data$Open-data$Close, ylim = c(-12, 50), ylab = "Price / Profit", 
+     main = "VIX Open Price and Daily Profit per Share")
+lines(Date, VIX_Open, col = "blue")
+legend('topright', legend = c('Profit', 'VIX'), 
+       col = c("black", "blue"), lty=1)
+```
